@@ -1,0 +1,22 @@
+body { margin: 0; font-family: system-ui, sans-serif; background: #f3f4f6; color: #1f2937; }
+main { max-width: 1000px; margin: auto; padding: 24px; }
+.board { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.column { background: #e5e7eb; padding: 12px; border-radius: 8px; }
+.column h2 { font-size: 1rem; margin-top: 0; display: flex; align-items: center; gap: 8px; }
+.count { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: #1f2937; color: #fff; font-size: 0.8rem; font-weight: 600; }
+.card { background: #fff; padding: 10px; border-radius: 6px; margin-bottom: 8px;
+        border-left: 4px solid #9ca3af; display: grid; gap: 4px; }
+.prio-alta { border-color: #dc2626; }
+.prio-media { border-color: #f59e0b; }
+.prio-baja { border-color: #16a34a; }
+.task-form { display: flex; gap: 8px; margin-bottom: 16px; }
+.task-form input { flex: 1; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; }
+button, select { padding: 6px 10px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; cursor: pointer; }
+.card-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; }
+.form-error { color: #dc2626; font-size: 0.85rem; margin: 0 0 12px; }
+.search { width: 100%; padding: 8px; margin-bottom: 16px; border: 1px solid #d1d5db; border-radius: 6px; }
+.reset-btn { margin-bottom: 0; padding: 8px 12px; cursor: pointer; background-color: #ff4d4d; color: white; border: none; border-radius: 4px; }
+.clear-btn { padding: 8px 12px; cursor: pointer; background-color: #16a34a; color: white; border: none; border-radius: 4px; }
+.toolbar { display: flex; gap: 8px; margin-bottom: 16px; }
+.error { background: #fee2e2; color: #991b1b; padding: 8px 12px; border-radius: 6px; margin: 0 0 12px; }
+.loading { color: #6b7280; }
