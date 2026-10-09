@@ -6,7 +6,7 @@ import { useBoard } from "./context/BoardContext";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 
 export default function App() {
-  const { tasks, resetBoard, clearDone } = useBoard();
+  const { tasks, loading, error, resetBoard, clearDone } = useBoard();
   const [query, setQuery] = useLocalStorage("kanban-search-query", "");
 
   useEffect(() => {
@@ -38,23 +38,38 @@ export default function App() {
         onChange={(e) => setQuery(e.target.value)}
       />
       <div className="toolbar">
-        <button className="reset-btn" onClick={handleReset}>
+        <button
+          className="reset-btn"
+          onClick={handleReset}
+          disabled={loading}
+        >
           Restablecer tablero
         </button>
-        <button className="clear-btn" onClick={clearDone}>
+        <button
+          className="clear-btn"
+          onClick={clearDone}
+          disabled={loading}
+        >
           Vaciar columna Hecho
         </button>
       </div>
-      <div className="board">
-        {COLUMNS.map((c) => (
-          <Column
-            key={c.id}
-            title={c.title}
-            count={tasks.filter((t) => t.status === c.id).length}
-            tasks={filteredTasks.filter((t) => t.status === c.id)}
-          />
-        ))}
-      </div>
+
+      {error && <p className="error">{error}</p>}
+
+      {loading ? (
+        <p className="loading">Cargando tareas...</p>
+      ) : (
+        <div className="board">
+          {COLUMNS.map((c) => (
+            <Column
+              key={c.id}
+              title={c.title}
+              count={tasks.filter((t) => t.status === c.id).length}
+              tasks={filteredTasks.filter((t) => t.status === c.id)}
+            />
+          ))}
+        </div>
+      )}
     </main>
   );
 }
