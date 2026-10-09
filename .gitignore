@@ -2,6 +2,7 @@
 !/kanban/
 !/kanban-api/
 !/evidencia/
+!README.md
 !.gitignore
 !.gitattributes
 
