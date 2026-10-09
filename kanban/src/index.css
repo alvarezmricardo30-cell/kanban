@@ -6,6 +6,11 @@ main { max-width: 1000px; margin: auto; padding: 24px; }
 .count { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: #1f2937; color: #fff; font-size: 0.8rem; font-weight: 600; }
 .card { background: #fff; padding: 10px; border-radius: 6px; margin-bottom: 8px;
         border-left: 4px solid #9ca3af; display: grid; gap: 4px; }
+.card small { display: block; color: #6b7280; }
+.card-title { cursor: pointer; }
+.card-title:hover { text-decoration: underline; }
+.card-date { color: #9ca3af; font-size: 0.75rem; }
+.card-edit { font: inherit; font-weight: 600; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; width: 100%; box-sizing: border-box; }
 .prio-alta { border-color: #dc2626; }
 .prio-media { border-color: #f59e0b; }
 .prio-baja { border-color: #16a34a; }

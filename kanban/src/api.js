@@ -32,6 +32,13 @@ export const updateStatus = (id, status) =>
     body: JSON.stringify({ status }),
   });
 
+export const updateTitle = (id, title) =>
+  request(`${API}/${id}`, {
+    method: "PUT",
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ title }),
+  });
+
 export const deleteTask = (id) => request(`${API}/${id}`, { method: "DELETE" });
 
 export const deleteDone = () =>

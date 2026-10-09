@@ -13,6 +13,10 @@ function reducer(state, action) {
       return state.map((t) =>
         t.id === action.id ? { ...t, status: action.status } : t
       );
+    case "rename":
+      return state.map((t) =>
+        t.id === action.id ? { ...t, title: action.title } : t
+      );
     case "remove":
       return state.filter((t) => t.id !== action.id);
     case "removeDone":
@@ -48,12 +52,26 @@ export function BoardProvider({ children }) {
   }
 
   async function moveTask(id, status) {
+    const previous = tasks;
+    setError(null);
+    dispatch({ type: "move", id, status });
+    try {
+      await api.updateStatus(id, status);
+    } catch (err) {
+      dispatch({ type: "set", tasks: previous });
+      setError(err.message);
+    }
+  }
+
+  async function renameTask(id, title) {
     try {
       setError(null);
-      await api.updateStatus(id, status);
-      dispatch({ type: "move", id, status });
+      const updated = await api.updateTitle(id, title);
+      dispatch({ type: "rename", id, title: updated.title });
+      return true;
     } catch (err) {
       setError(err.message);
+      return false;
     }
   }
 
@@ -89,7 +107,7 @@ export function BoardProvider({ children }) {
 
   return (
     <BoardContext.Provider
-      value={{ tasks, loading, error, addTask, moveTask, removeTask, clearDone, resetBoard }}
+      value={{ tasks, loading, error, addTask, moveTask, renameTask, removeTask, clearDone, resetBoard }}
     >
       {children}
     </BoardContext.Provider>

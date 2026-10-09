@@ -26,7 +26,16 @@ const SEED = [
   ["Preparar la demo", "todo", "alta"],
 ];
 
-const SELECT_ALL = "SELECT id, title, status, priority, created_at FROM tasks ORDER BY id";
+const SELECT_ALL =
+  "SELECT t.id, t.title, t.status, t.priority, t.created_at, t.project_id, p.name AS project FROM tasks t LEFT JOIN projects p ON p.id = t.project_id ORDER BY t.id";
+
+const SELECT_ONE =
+  "SELECT t.id, t.title, t.status, t.priority, t.created_at, t.project_id, p.name AS project FROM tasks t LEFT JOIN projects p ON p.id = t.project_id WHERE t.id = ?";
+
+async function getTaskById(id) {
+  const [rows] = await pool.query(SELECT_ONE, [id]);
+  return rows[0] || null;
+}
 
 const handle = (fn) => async (req, res) => {
   try {
@@ -54,12 +63,28 @@ app.post("/api/tasks", handle(async (req, res) => {
     "INSERT INTO tasks (title, priority) VALUES (?, ?)",
     [title.trim(), priority]
   );
-  res.status(201).json({
-    id: result.insertId,
-    title: title.trim(),
-    status: "todo",
-    priority,
-  });
+  const task = await getTaskById(result.insertId);
+  res.status(201).json(task);
+}));
+
+app.put("/api/tasks/:id", handle(async (req, res) => {
+  const { title } = req.body;
+  if (!title || !title.trim()) {
+    return res.status(400).json({ error: "El título es obligatorio" });
+  }
+  const clean = title.trim();
+  if (clean.length > 150) {
+    return res.status(400).json({ error: "El título no puede superar 150 caracteres" });
+  }
+  const [result] = await pool.query(
+    "UPDATE tasks SET title = ? WHERE id = ?",
+    [clean, req.params.id]
+  );
+  if (result.affectedRows === 0) {
+    return res.status(404).json({ error: "Tarea no encontrada" });
+  }
+  const task = await getTaskById(req.params.id);
+  res.json(task);
 }));
 
 app.patch("/api/tasks/:id", handle(async (req, res) => {
