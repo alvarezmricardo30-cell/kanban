@@ -1,22 +1,23 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export function useLocalStorage(key, initialValue) {
   const [value, setValue] = useState(() => {
     try {
       const saved = localStorage.getItem(key);
-      return saved ? JSON.parse(saved) : initialValue;
+      return saved === null ? initialValue : JSON.parse(saved);
     } catch {
       return initialValue;
     }
   });
 
-  useEffect(() => {
+  function update(next) {
+    setValue(next);
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      localStorage.setItem(key, JSON.stringify(next));
     } catch {
-      // localStorage no disponible (por ejemplo al abrir con file://)
+      /* almacenamiento no disponible */
     }
-  }, [key, value]);
+  }
 
-  return [value, setValue];
+  return [value, update];
 }

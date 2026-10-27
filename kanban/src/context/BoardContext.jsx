@@ -1,30 +1,14 @@
-import { createContext, useContext, useEffect, useReducer, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
 import * as api from "../api";
+import { reducer } from "./boardReducer";
 
 const BoardContext = createContext(null);
-
-function reducer(state, action) {
-  switch (action.type) {
-    case "set":
-      return action.tasks;
-    case "add":
-      return [...state, action.task];
-    case "move":
-      return state.map((t) =>
-        t.id === action.id ? { ...t, status: action.status } : t
-      );
-    case "rename":
-      return state.map((t) =>
-        t.id === action.id ? { ...t, title: action.title } : t
-      );
-    case "remove":
-      return state.filter((t) => t.id !== action.id);
-    case "removeDone":
-      return state.filter((t) => t.status !== "done");
-    default:
-      return state;
-  }
-}
 
 export function BoardProvider({ children }) {
   const [tasks, dispatch] = useReducer(reducer, []);
@@ -52,14 +36,14 @@ export function BoardProvider({ children }) {
   }
 
   async function moveTask(id, status) {
-    const previous = tasks;
-    setError(null);
-    dispatch({ type: "move", id, status });
     try {
+      setError(null);
       await api.updateStatus(id, status);
+      dispatch({ type: "move", id, status });
+      return true;
     } catch (err) {
-      dispatch({ type: "set", tasks: previous });
       setError(err.message);
+      return false;
     }
   }
 
@@ -75,13 +59,27 @@ export function BoardProvider({ children }) {
     }
   }
 
+  async function editTask(id, title, priority) {
+    try {
+      setError(null);
+      await api.updateTask(id, title, priority);
+      dispatch({ type: "edit", id, title, priority });
+      return true;
+    } catch (err) {
+      setError(err.message);
+      return false;
+    }
+  }
+
   async function removeTask(id) {
     try {
       setError(null);
       await api.deleteTask(id);
       dispatch({ type: "remove", id });
+      return true;
     } catch (err) {
       setError(err.message);
+      return false;
     }
   }
 
@@ -90,8 +88,10 @@ export function BoardProvider({ children }) {
       setError(null);
       await api.deleteDone();
       dispatch({ type: "removeDone" });
+      return true;
     } catch (err) {
       setError(err.message);
+      return false;
     }
   }
 
@@ -100,14 +100,27 @@ export function BoardProvider({ children }) {
       setError(null);
       const data = await api.resetTasks();
       dispatch({ type: "set", tasks: data });
+      return true;
     } catch (err) {
       setError(err.message);
+      return false;
     }
   }
 
   return (
     <BoardContext.Provider
-      value={{ tasks, loading, error, addTask, moveTask, renameTask, removeTask, clearDone, resetBoard }}
+      value={{
+        tasks,
+        loading,
+        error,
+        addTask,
+        moveTask,
+        renameTask,
+        editTask,
+        removeTask,
+        clearDone,
+        resetBoard,
+      }}
     >
       {children}
     </BoardContext.Provider>

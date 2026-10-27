@@ -1,16 +1,58 @@
-# React + Vite
+# Kanban · Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Aplicación de tablero Kanban con React, Vite y React Router.
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js 20 o superior
+- La API de `kanban-api/` encendida en http://localhost:3001
 
-## React Compiler
+## Puesta en marcha
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install
+npm run dev
+```
 
-## Expanding the Oxlint configuration
+Abre http://localhost:5173
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Scripts
+
+- `npm run dev` — servidor de desarrollo
+- `npm run build` — versión de producción en `dist/`
+- `npm run preview` — sirve la versión de producción
+- `npm test` — pruebas del reducer con Vitest
+- `npm run lint` — revisión de código con oxlint
+
+## Estructura
+
+```
+src/
+  components/   Piezas reutilizables (Column, TaskCard, TaskForm)
+  context/      Estado global con Context + useReducer
+  hooks/        Hooks personalizados (useLocalStorage)
+  pages/        Pantallas asociadas a rutas
+  api.js        Llamadas a la API REST
+  App.jsx       Menú y tabla de rutas
+  main.jsx      Punto de entrada con BrowserRouter y BoardProvider
+```
+
+## Rutas
+
+| Ruta | Página |
+| --- | --- |
+| `/` | Tablero |
+| `/stats` | Estadísticas |
+| `/tarea/:id` | Detalle y edición de una tarea |
+| `*` | Página 404 |
+
+## Variables de entorno
+
+Copia `.env.example` a `.env` y ajusta la dirección de la API:
+
+```
+VITE_API_URL=http://localhost:3001
+```
+
+En Vite solo las variables que empiezan con `VITE_` llegan al navegador, así que
+nunca deben contener contraseñas ni claves secretas.

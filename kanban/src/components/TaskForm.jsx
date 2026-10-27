@@ -43,7 +43,9 @@ export default function TaskForm() {
           placeholder="Nueva tarea..."
         />
         <select value={priority} onChange={(e) => setPriority(e.target.value)}>
-          <option value="" disabled>Seleccione prioridad</option>
+          <option value="" disabled>
+            Seleccione prioridad
+          </option>
           <option value="alta">Alta</option>
           <option value="media">Media</option>
           <option value="baja">Baja</option>
