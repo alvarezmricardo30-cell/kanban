@@ -3,14 +3,15 @@ import cors from "cors";
 import mysql from "mysql2/promise";
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: process.env.CORS_ORIGIN ?? "*" }));
 app.use(express.json());
 
 const pool = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "kanban_db",
+  host: process.env.DB_HOST ?? "localhost",
+  port: Number(process.env.DB_PORT ?? 3306),
+  user: process.env.DB_USER ?? "root",
+  password: process.env.DB_PASSWORD ?? "",
+  database: process.env.DB_NAME ?? "kanban_db",
   waitForConnections: true,
   connectionLimit: 10,
   charset: "utf8mb4",
@@ -18,13 +19,6 @@ const pool = mysql.createPool({
 
 const STATUS = ["todo", "doing", "done"];
 const PRIORITY = ["alta", "media", "baja"];
-
-const SEED = [
-  ["Diseñar la base de datos", "done", "alta"],
-  ["Crear el login", "doing", "media"],
-  ["Escribir pruebas", "todo", "baja"],
-  ["Preparar la demo", "todo", "alta"],
-];
 
 const SELECT_ALL =
   "SELECT t.id, t.title, t.status, t.priority, t.created_at, t.project_id, p.name AS project FROM tasks t LEFT JOIN projects p ON p.id = t.project_id ORDER BY t.id";
@@ -68,7 +62,7 @@ app.post("/api/tasks", handle(async (req, res) => {
 }));
 
 app.put("/api/tasks/:id", handle(async (req, res) => {
-  const { title } = req.body;
+  const { title, priority } = req.body;
   if (!title || !title.trim()) {
     return res.status(400).json({ error: "El título es obligatorio" });
   }
@@ -76,10 +70,23 @@ app.put("/api/tasks/:id", handle(async (req, res) => {
   if (clean.length > 150) {
     return res.status(400).json({ error: "El título no puede superar 150 caracteres" });
   }
-  const [result] = await pool.query(
-    "UPDATE tasks SET title = ? WHERE id = ?",
-    [clean, req.params.id]
-  );
+
+  let result;
+  if (priority === undefined) {
+    [result] = await pool.query(
+      "UPDATE tasks SET title = ? WHERE id = ?",
+      [clean, req.params.id]
+    );
+  } else {
+    if (!PRIORITY.includes(priority)) {
+      return res.status(400).json({ error: "Prioridad no válida" });
+    }
+    [result] = await pool.query(
+      "UPDATE tasks SET title = ?, priority = ? WHERE id = ?",
+      [clean, priority, req.params.id]
+    );
+  }
+
   if (result.affectedRows === 0) {
     return res.status(404).json({ error: "Tarea no encontrada" });
   }
@@ -103,9 +110,7 @@ app.patch("/api/tasks/:id", handle(async (req, res) => {
 }));
 
 app.delete("/api/tasks/:id", handle(async (req, res) => {
-  const [result] = await pool.query("DELETE FROM tasks WHERE id = ?", [
-    req.params.id,
-  ]);
+  const [result] = await pool.query("DELETE FROM tasks WHERE id = ?", [req.params.id]);
   if (result.affectedRows === 0) {
     return res.status(404).json({ error: "Tarea no encontrada" });
   }
@@ -113,22 +118,24 @@ app.delete("/api/tasks/:id", handle(async (req, res) => {
 }));
 
 app.delete("/api/tasks", handle(async (req, res) => {
-  const [result] = await pool.query("DELETE FROM tasks WHERE status = ?", [
-    "done",
-  ]);
+  const [result] = await pool.query("DELETE FROM tasks WHERE status = ?", ["done"]);
   res.json({ deleted: result.affectedRows });
 }));
 
 app.post("/api/tasks/reset", handle(async (req, res) => {
   await pool.query("TRUNCATE TABLE tasks");
-  for (const [title, status, priority] of SEED) {
-    await pool.query(
-      "INSERT INTO tasks (title, status, priority) VALUES (?, ?, ?)",
-      [title, status, priority]
-    );
-  }
+  const [rowsSeed] = await pool.query(
+    "INSERT INTO tasks (title, status, priority, project_id) VALUES (?,?,?,?),(?,?,?,?),(?,?,?,?),(?,?,?,?)",
+    [
+      "Diseñar la base de datos", "done", "alta", 1,
+      "Crear el login", "doing", "media", 1,
+      "Escribir pruebas", "todo", "baja", 2,
+      "Preparar la demo", "todo", "alta", null
+    ]
+  );
   const [rows] = await pool.query(SELECT_ALL);
   res.json(rows);
 }));
 
-app.listen(3001, () => console.log("API en http://localhost:3001"));
+const PORT = process.env.PORT ?? 3001;
+app.listen(PORT, () => console.log(`API en http://localhost:${PORT}`));
